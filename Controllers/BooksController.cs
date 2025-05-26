@@ -20,22 +20,38 @@ namespace BookStore.Controllers
         }
 
         // GET: Books
-        public async Task<IActionResult> Index(string searchString)
+        // GET: Movies
+        public async Task<IActionResult> Index(string bookGenre, string searchString)
         {
             if (_context.Book == null)
             {
-                return Problem("Нет такой книги");
+                return Problem("Такой книги нет");
             }
 
-            var books = from m in _context.Book
-                         select m;
+            // Use LINQ to get list of genres.
+            IQueryable<string> genreQuery = from b in _context.Book
+                                            orderby b.Genre
+                                            select b.Genre;
+            var books = from b in _context.Book
+                         select b;
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 books = books.Where(s => s.Title!.ToUpper().Contains(searchString.ToUpper()));
             }
-            var bookStoreContext = _context.Book.Include(b => b.Order);
-            return View(await bookStoreContext.ToListAsync());
+
+            if (!string.IsNullOrEmpty(bookGenre))
+            {
+                books = books.Where(x => x.Genre == bookGenre);
+            }
+
+            var bookGenreVM = new BookGenreViewModel
+            {
+                Genres = new SelectList(await genreQuery.Distinct().ToListAsync()),
+                Books = await books.ToListAsync()
+            };
+
+            return View(bookGenreVM);
         }
 
         // GET: Books/Details/5
@@ -71,12 +87,12 @@ namespace BookStore.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("BookId,Title,ReleaseDate,Genre,Price,OrderID")] Book book)
         {
-            if (ModelState.IsValid)
-            {
+            //if (ModelState.IsValid)
+            //{
                 _context.Add(book);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
-            }
+            //}
             ViewData["OrderID"] = new SelectList(_context.Set<Order>(), "OrderId", "OrderId", book.OrderID);
             return View(book);
         }
@@ -110,7 +126,7 @@ namespace BookStore.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            //if (ModelState.IsValid)
             {
                 try
                 {

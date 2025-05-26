@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using BookStore.Data;
+using BookStore.Models;
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<BookStoreContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("BookStoreContext") ?? throw new InvalidOperationException("Connection string 'BookStoreContext' not found.")));
@@ -9,6 +10,15 @@ builder.Services.AddDbContext<BookStoreContext>(options =>
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    BookData.Initialize(services);
+    AuthorData.Initialize(services);
+    OrderData.Initialize(services);
+
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

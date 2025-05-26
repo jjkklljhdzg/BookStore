@@ -1,4 +1,4 @@
-﻿@model IEnumerable<BookStore.Models.Book>
+﻿@model BookStore.Models.BookGenreViewModel
 
 @{
     ViewData["Title"] = "Index";
@@ -11,7 +11,11 @@
 </p>
 <form asp-controller="Books" asp-action="Index" method="get">
     <p>
-        <label>Title: <input type="text" name="SearchString" /></label>
+        <select asp-for="BookGenre" asp-items="Model.Genres">
+            <option value="">Все</option>
+        </select>
+
+        <label>Название: <input type="text" asp-for="SearchString" /></label>
         <input type="submit" value="Фильтр" />
     </p>
 </form>
@@ -19,25 +23,25 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                Название
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
+                Дата публикации
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Genre)
+                Жанр
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Price)
+                Цена
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Order)
+                ID заказа
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
+@foreach (var item in Model.Books!) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Title)
@@ -51,9 +55,9 @@
             <td>
                 @Html.DisplayFor(modelItem => item.Price)
             </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Order.OrderId)
-            </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OrderID)
+                </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.BookId">Редактировать</a> |
                 <a asp-action="Details" asp-route-id="@item.BookId">Детали</a> |
